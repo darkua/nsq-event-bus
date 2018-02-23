@@ -39,10 +39,6 @@ func On(lc ListenerConfig) error {
 		lc.Lookup = []string{"localhost:4161"}
 	}
 
-	if len(lc.Nsqd) == 0 {
-		lc.Lookup = []string{"localhost:4150"}
-	}
-
 	if lc.HandlerConcurrency == 0 {
 		lc.HandlerConcurrency = 1
 	}

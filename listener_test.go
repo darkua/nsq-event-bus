@@ -65,7 +65,7 @@ func testOn(t *testing.T) {
 		Channel:                 "test_on",
 		HandlerFunc:             handler,
 		HandlerConcurrency:      1,
-		Lookup:                  []string{"localhost:4161"},
+		Nsqd:	                 "localhost:4150",
 		DialTimeout:             time.Second * 1,
 		ReadTimeout:             time.Second * 60,
 		WriteTimeout:            time.Second * 1,
