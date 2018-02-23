@@ -51,6 +51,7 @@ type ListenerConfig struct {
 	Topic                   string
 	Channel                 string
 	Lookup                  []string
+	Nsqd                    string
 	HandlerFunc             HandlerFunc
 	HandlerConcurrency      int
 	DialTimeout             time.Duration

@@ -39,6 +39,10 @@ func On(lc ListenerConfig) error {
 		lc.Lookup = []string{"localhost:4161"}
 	}
 
+	if len(lc.Nsqd) == 0 {
+		lc.Lookup = []string{"localhost:4150"}
+	}
+
 	if lc.HandlerConcurrency == 0 {
 		lc.HandlerConcurrency = 1
 	}
@@ -50,8 +54,13 @@ func On(lc ListenerConfig) error {
 	}
 
 	handler := handleMessage(lc)
+
 	consumer.AddConcurrentHandlers(handler, lc.HandlerConcurrency)
-	return consumer.ConnectToNSQLookupds(lc.Lookup)
+	if len(lc.Nsqd) == 0{
+		return consumer.ConnectToNSQLookupds(lc.Lookup)	
+	} else {
+		return consumer.ConnectToNSQD(lc.Nsqd)
+	}
 }
 
 func handleMessage(lc ListenerConfig) nsq.HandlerFunc {
