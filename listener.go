@@ -59,6 +59,48 @@ func On(lc ListenerConfig) error {
 	}
 }
 
+// On listen to a message from a specific topic using nsq consumer, returns
+// an error if topic and channel not passed or if an error occurred while creating
+// nsq consumer.
+func OnSync(lc ListenerConfig) (*nsq.Consumer,error) {
+	if len(lc.Topic) == 0 {
+		return nil,ErrTopicRequired
+	}
+
+	if len(lc.Channel) == 0 {
+		return nil,ErrChannelRequired
+	}
+
+	if lc.HandlerFunc == nil {
+		return nil,ErrHandlerRequired
+	}
+
+	if len(lc.Lookup) == 0 {
+		lc.Lookup = []string{"localhost:4161"}
+	}
+
+	if lc.HandlerConcurrency == 0 {
+		lc.HandlerConcurrency = 1
+	}
+
+	config := newListenerConfig(lc)
+	consumer, err := nsq.NewConsumer(lc.Topic, lc.Channel, config)
+	if err != nil {
+		return consumer, err
+	}
+
+	handler := handleMessage(lc)
+
+	consumer.AddConcurrentHandlers(handler, lc.HandlerConcurrency)
+	if len(lc.Nsqd) == 0{
+		return consumer, consumer.ConnectToNSQLookupds(lc.Lookup)
+	} else {
+		return consumer, consumer.ConnectToNSQD(lc.Nsqd)
+	}
+	return consumer, err
+}
+
+
 func handleMessage(lc ListenerConfig) nsq.HandlerFunc {
 	return nsq.HandlerFunc(func(message *nsq.Message) error {
 		m := Message{Message: message}
